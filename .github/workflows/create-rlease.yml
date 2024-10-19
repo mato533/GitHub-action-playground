@@ -16,17 +16,19 @@ on:
 jobs:
   bump-version:
     runs-on: ubuntu-latest
+    env:
+      VERSION_TYPE: ${{ github.event.inputs.version-type }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Display selected version type
-        run: echo 'Selected version type: {{ github.event.inputs.version-type }}'
+        run: echo "Selected version type-> ${VERSION_TYPE}"
         
       # You can add your own logic here based on the selected version type
       - name: Bump version based on input
         run: |
-          case "${{ github.event.inputs.version_type }}" in
+          case "${VERSION_TYPE}" in
             major)
               echo "Bumping major version"
               # Add logic to bump major version
