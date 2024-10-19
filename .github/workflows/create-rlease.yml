@@ -1,0 +1,42 @@
+name: Bump Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-type:
+        description: 'Select version type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Display selected version type
+        run: echo 'Selected version type: {{ github.event.inputs.version-type }}'
+        
+      # You can add your own logic here based on the selected version type
+      - name: Bump version based on input
+        run: |
+          case "${{ github.event.inputs.version_type }}" in
+            major)
+              echo "Bumping major version"
+              # Add logic to bump major version
+              ;;
+            minor)
+              echo "Bumping minor version"
+              # Add logic to bump minor version
+              ;;
+            patch)
+              echo "Bumping patch version"
+              # Add logic to bump patch version
+              ;;
+          esac
