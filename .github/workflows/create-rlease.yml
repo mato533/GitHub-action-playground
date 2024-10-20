@@ -105,8 +105,7 @@ jobs:
           git add .
           git commit -m "chore: update version of package.json" -m "[AUTO]"
           git push -u origin "${BRANCH_NAME}"
-          gh pr create --title "chore(release): ${APP_VERSION_TEXT}" --body "**Preparations for ${APP_VERSION_TEXT}**"
-
+          
 
       - name: Checkout new repository
         env:
