@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     env:
       VERSION_TYPE: ${{ github.event.inputs.version-type }}
