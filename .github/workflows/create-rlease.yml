@@ -111,4 +111,4 @@ jobs:
         env:
           APP_VERSION_TEXT: ${{steps.identify-version.outputs.app-version-text}}
         run: |
-          gh pr create --title "chore(release): ${APP_VERSION_TEXT}" --body "**Preparations for ${APP_VERSION_TEXT}**"
+          gh pr create --title "chore(release): ${APP_VERSION_TEXT}" --body "**Preparations for ${APP_VERSION_TEXT}** --label release"
