@@ -1,5 +1,5 @@
 name: Check for pull request
-run-name: "action test"
+run-name: "Action test"
 on:
   pull_request:
     types:
