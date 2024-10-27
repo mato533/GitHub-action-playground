@@ -33,9 +33,3 @@ jobs:
           echo '3' ${{ github.ref_name }}
           echo '4' ${{ github.head_ref }} 
           echo '5' ${{ github.base_ref }}
-
-      - name: check log
-        run: |
-          # git log --pretty=format:"%h - %an, %ar : %s" |head -n 10
-          echo "${{ toJson(github)}}"
-          echo "${{ toJson(github.event)}}"
