@@ -21,8 +21,8 @@ jobs:
     steps:
       - uses: mato533/cicd-actions/pre-check@develop
         id: pre-check
-        with:
-          target-sha: ${{ github.event.pull_request.head.sha }}
+        # with:
+        #   target-sha: ${{ github.event.pull_request.head.sha }}
       
       - run: |
           echo "Result"
