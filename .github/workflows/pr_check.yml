@@ -1,4 +1,5 @@
 name: Check for pull request
+run-name: "action test"
 on:
   pull_request:
     types:
@@ -15,7 +16,7 @@ env:
 
 jobs:
   test:
-    name: Test1
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: mato533/cicd-actions/pre-check@develop
