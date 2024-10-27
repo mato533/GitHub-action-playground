@@ -11,10 +11,6 @@ on:
       - src/**
       - '!**.md'
 
-# concurrency:
-#   group: ci-${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: true
-
 jobs:
   test:
     name: Test1
