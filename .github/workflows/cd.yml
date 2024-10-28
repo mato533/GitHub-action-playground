@@ -10,11 +10,10 @@ concurrency:
   group: cd-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GH_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
-  GH_USER: 'github-actions[bot]'
+  GH_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+  GH_USER: "github-actions[bot]"
 
 jobs:
   check-release:
@@ -40,14 +39,14 @@ jobs:
 
     # check release/* -> mainへのマージ
   test:
-    needs: 
+    needs:
       - check-release
     if: ${{ needs.check-release.outputs.is_release > 0 }}
     uses: ./.github/workflows/test.yml
 
   get_version:
     name: get version
-    needs: 
+    needs:
       - check-release
     if: ${{ startsWith(github.head_ref, 'release/') && (needs.check-release.outputs.is_release > 0)}}
     uses: ./.github/workflows/version.yml
@@ -77,7 +76,6 @@ jobs:
         run: |
           git log --pretty=format:"%h - %an, %ar : %s" |head -n 10
 
-          
   tag:
     name: Add the tag for the released version
     needs:

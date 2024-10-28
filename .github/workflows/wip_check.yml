@@ -22,7 +22,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 1
-      
+
       - name: Check wip
         id: check-wip
         run: |

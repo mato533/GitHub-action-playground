@@ -1,202 +1,27 @@
-# Lint/Test はpull オープン時オープン時
 name: Check for pull request
+run-name: "Action Test"
 on:
   pull_request:
     types:
       - opened
       - reopened
-      - synchronize
-  
-
+      # - synchronize
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GH_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
-  GH_USER: 'github-actions[bot]'
+  GH_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+  GH_USER: "github-actions[bot]"
 
 jobs:
-
-  check_wip:
-    name: Check latest commit message
-    uses: ./.github/workflows/wip_check.yml
-          
-  lint:
-    name: Lint and Format
+  test:
+    name: Test
     runs-on: ubuntu-latest
-    needs:
-      - check_wip
-    if: ${{ needs.check_wip.outputs.is_wip == 0 && needs.check_wip.outputs.is_skip == 0 }}
-    outputs:
-      is_update_format: ${{ steps.check_changes.outputs.is_changed }}
     steps:
-      - name: cond
-        run: |
-          echo "is_wip  :${{ needs.check_wip.outputs.is_wip }}"
-          echo "is_skip :${{ needs.check_wip.outputs.is_skip }}"
-      - uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          # required
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-      - name: Get GitHub App User ID
-        id: get-user-id
-        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
+      - uses: mato533/cicd-actions/pre-check@develop
+        id: pre-check
+        # with:
+        #   target-sha: ${{ github.event.pull_request.head.sha }}
 
       - run: |
-          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
-          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>'
-      - name: Checkout
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          token: ${{ env.GH_TOKEN }}
-          
-      - name: lint
-        run: |
-          cat <<EOF>>ci.log
-          # ========
-          ${{ github.event.pull_request.commits }}
-          EOF
-        # lint したらテストコマンドを流す
-
-      - name: Check if there are any changes
-        id: check_changes
-        run: |
-          VAR_NAME="is_changed"
-          git add -N .
-          if git diff --exit-code --quiet; then
-            echo "No changes detected."
-            echo "${VAR_NAME}=0" >>"${GITHUB_OUTPUT}"
-          else
-            echo "Changes detected."
-            echo "${VAR_NAME}=1" >>"${GITHUB_OUTPUT}"
-          fi
-
-
-
-  get_version:
-    name: Get version for package.json
-    needs:
-      - check_wip
-    if: ${{ startsWith(github.head_ref, 'release/') }}
-    uses: ./.github/workflows/version.yml
-
-  check_package_json:
-    name: Check the version of package.json
-    needs:
-      - check_wip
-      - get_version
-    if: ${{ startsWith(github.head_ref, 'release/') && (needs.check_wip.outputs.is_wip == 0) }}
-
-    outputs:
-      is_updated: ${{ steps.check-branch.outputs.is_update_package_json }}
-      app_version: ${{ steps.check-branch.outputs.app_version}}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-      
-
-      - name: Check package.json
-        id: check-branch
-        run: |
-          BRANCH_NAME="${{ github.head_ref }}"
-          APP_VERSION_TEXT=${BRANCH_NAME##*/}
-          APP_VERSION="$(echo "${APP_VERSION_TEXT}"| grep -o -E "([0-9]+\.){1}[0-9]+(\.[0-9]+)?")"
-          echo "app_version_text=${APP_VERSION_TEXT}" >>"${GITHUB_OUTPUT}"
-          echo "app_version=${APP_VERSION}" >>"${GITHUB_OUTPUT}"
-          VAR_NAME="is_update_package_json"
-          if [ "${APP_VERSION_TEXT}" = "${{ needs.get_version.outputs.app_version_text }}" ]; then
-            echo "Branch name and package.json are consistent"
-            echo "  from branch name  : ${APP_VERSION_TEXT}"
-            echo "  from package.json : ${{ needs.get_version.outputs.app_version_text }}"
-            echo "${VAR_NAME}=0" >>"${GITHUB_OUTPUT}"
-          else
-            echo "Branch name and package.json are inconsistent"
-            echo "  from branch name  : ${APP_VERSION_TEXT}"
-            echo "  from package.json : ${{ needs.get_version.outputs.app_version_text }}"
-            echo "${VAR_NAME}=1" >>"${GITHUB_OUTPUT}"
-          fi
-
-  commit:
-    name: Commit and push local changes
-    runs-on: ubuntu-latest
-    needs:
-      - check_package_json
-      - lint
-    if: ${{ always() }}
-    steps:
-      - name: condition
-        id: condition
-        run: |
-          echo "package: ${{needs.check_package_json.outputs.is_updated}}"
-          echo "lint: ${{needs.lint.outputs.is_update_format }}"
-          is_updated_package=$(test -z "${{needs.check_package_json.outputs.is_updated}}" && echo 0 || echo ${{needs.check_package_json.outputs.is_updated}})
-          echo "is_updated_package=${is_updated_package}" >>"${GITHUB_OUTPUT}"
-          echo "is_updated_package=${is_updated_package}"
-          
-          is_updated_lint=$(test -z "${{needs.lint.outputs.is_update_format}}" && echo 0 || echo ${{needs.lint.outputs.is_update_format}})
-          echo "is_updated_lint=${is_updated_lint}">>"${GITHUB_OUTPUT}"
-          echo "is_updated_lint=${is_updated_lint}"
-          if [ $is_updated_package == 0 ] && [ $is_updated_lint == 0 ] ;then
-            echo "is_skip=1">>"${GITHUB_OUTPUT}";
-          else
-            echo "is_skip=0">>"${GITHUB_OUTPUT}";
-          fi
-
-      - uses: actions/create-github-app-token@v1
-        id: app-token
-        if: ${{ steps.condition.outputs.is_skip == 0 }}
-        with:
-          # required
-          app-id: ${{ vars.APP_ID }}
-          private-key: ${{ secrets.PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-
-      - name: Get GitHub App User ID
-        if: ${{ steps.condition.outputs.is_skip == 0 }}
-        id: get-user-id
-        run: echo "user-id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
-
-      - name: Configration for git
-        if: ${{ steps.condition.outputs.is_skip == 0 }}
-        run: |
-          git config --global user.name '${{ steps.app-token.outputs.app-slug }}[bot]'
-          git config --global user.email '${{ steps.get-user-id.outputs.user-id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>'
-
-      - name: Checkout
-        if: ${{ steps.condition.outputs.is_skip == 0 }}
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          token: ${{ env.GH_TOKEN }}
-
-      - name: lint
-        if: ${{ steps.condition.outputs.is_skip == 0 && needs.lint.outputs.is_update_format > 0 }}
-        run: |
-          echo "RUN LINT">>ci.log
-          git add .
-          git commit -m "style: format and lint source codes [AUTO]"
-
-      - name: update package.json
-        if: ${{ steps.condition.outputs.is_skip == 0 && needs.check_package_json.outputs.is_updated > 0 }}
-        run: |
-          sed -i -e 's/\("version": "\).*\("\)/\1${{needs.check_package_json.outputs.app_version}}\2/' package.json
-          git add .
-          git commit -m "chore: update version of package.json [AUTO]"
-          
-
-      - name: Push
-        if: ${{ steps.condition.outputs.is_skip == 0 }}
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: git push
-
+          echo "Result"
+          echo ${{ steps.pre-check.outputs.is-skip }}

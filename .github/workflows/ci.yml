@@ -10,20 +10,48 @@ on:
       - synchronize
   # workflow_call:
 
-
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GH_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
-  GH_USER: 'github-actions[bot]'
+  GH_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+  GH_USER: "github-actions[bot]"
 
 jobs:
+  pre-check:
+    runs-on: ubuntu-latest
+    outputs:
+      is-skip: ${{ steps.pre-check.outputs.is-skip }}
+    steps:
+      - id: pre-check
+        uses: mato533/cicd-actions/pre-check@main
+        with:
+          target-sha: ${{ github.event.pull_request.head.sha }}
+
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      is-updated: ${{ steps.check.outputs.is-updated }}
+    needs:
+      - pre-check
+    if: ${{ needs.pre-check.outputs.is-skip == 0 }}
+    steps:
+      - uses: mato533/cicd-actions/setup-pnpm@develop
+
+      - uses: mato533/cicd-actions/format-source-code@develop
+        id: check
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+          branch: ${{ github.head_ref }}
+
   test:
     # add comment of pull request && comment is KEYWORD
-    # if: (github.event.issue.pull_request != null) && github.event.comment.body == '/run-test'
+    needs:
+      - pre-check
+      - check
+    if: ${{  !cancelled() && !failure() && (needs.pre-check.outputs.is-skip > 0 || needs.check.outputs.is-updated == 0) }}
     name: Run CI
     uses: ./.github/workflows/test.yml
