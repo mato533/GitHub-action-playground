@@ -32,7 +32,24 @@ jobs:
           if [ ${IS_SKIP} > 0 ]; then
             exit 0
           fi
-          
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4.0.0
+
+      - name: Setup node (20.x)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: check env
+        run: printenv
+
+
+        
       - uses: mato533/cicd-actions/format-source-code@develop
         with:
           app-id: ${{ vars.APP_ID }}
