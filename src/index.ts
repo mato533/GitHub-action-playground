@@ -1,4 +1,5 @@
 import path from "path";
+
 export default () => {
   const testVar: string = "test";
 
