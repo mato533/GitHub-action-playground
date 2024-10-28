@@ -38,20 +38,7 @@ jobs:
       - pre-check
     if: ${{ needs.pre-check.outputs.is-skip == 0 }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4.0.0
-
-      - name: Setup node (20.x)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install
+      - uses: mato533/cicd-actions/setup-pnpm@develop
 
       - uses: mato533/cicd-actions/format-source-code@develop
         id: check
