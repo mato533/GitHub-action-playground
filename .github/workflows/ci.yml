@@ -22,9 +22,13 @@ env:
 jobs:
   check:
     runs-on: ubuntu-latest
+    outputs:
+      is-updated: ${{ steps.check.outputs.is-updated }}
     steps:
       - id: pre-check
         uses: mato533/cicd-actions/pre-check@main
+        with:
+          target-sha: ${{ github.event.pull_request.head.sha }}
 
       - env:
           IS_SKIP: ${{ steps.pre-check.outputs.is-skip}}
@@ -45,10 +49,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: check env
-        run: ls -la
-
       - uses: mato533/cicd-actions/format-source-code@develop
+        id: check
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
@@ -56,6 +58,8 @@ jobs:
 
   test:
     # add comment of pull request && comment is KEYWORD
-    # if: (github.event.issue.pull_request != null) && github.event.comment.body == '/run-test'
+    needs: 
+      - check
+    if: ${{ needs.check.outputs.is-updated == 0 }}
     name: Run CI
     uses: ./.github/workflows/test.yml
