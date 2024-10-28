@@ -17,7 +17,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: mato533/cicd-actions/pre-check@develop
+      - uses: mato533/cicd-actions/pre-check@main
         id: pre-check
         # with:
         #   target-sha: ${{ github.event.pull_request.head.sha }}

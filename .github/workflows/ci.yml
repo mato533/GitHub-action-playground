@@ -38,9 +38,9 @@ jobs:
       - pre-check
     if: ${{ needs.pre-check.outputs.is-skip == 0 }}
     steps:
-      - uses: mato533/cicd-actions/setup-pnpm@develop
+      - uses: mato533/cicd-actions/setup-pnpm@main
 
-      - uses: mato533/cicd-actions/format-source-code@develop
+      - uses: mato533/cicd-actions/format-source-code@main
         id: check
         with:
           app-id: ${{ vars.APP_ID }}
