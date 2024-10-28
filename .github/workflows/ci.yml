@@ -48,8 +48,6 @@ jobs:
       - name: check env
         run: ls -la
 
-
-        
       - uses: mato533/cicd-actions/format-source-code@develop
         with:
           app-id: ${{ vars.APP_ID }}
