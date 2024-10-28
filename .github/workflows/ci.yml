@@ -58,7 +58,7 @@ jobs:
 
   test:
     # add comment of pull request && comment is KEYWORD
-    needs: 
+    needs:
       - check
     if: ${{ needs.check.outputs.is-updated == 0 }}
     name: Run CI
