@@ -20,23 +20,24 @@ env:
   GH_USER: "github-actions[bot]"
 
 jobs:
-  check:
+  pre-check:
     runs-on: ubuntu-latest
     outputs:
-      is-updated: ${{ steps.check.outputs.is-updated }}
+      is-skip: ${{ steps.pre-check.outputs.is-skip }}
     steps:
       - id: pre-check
         uses: mato533/cicd-actions/pre-check@main
         with:
           target-sha: ${{ github.event.pull_request.head.sha }}
 
-      - env:
-          IS_SKIP: ${{ steps.pre-check.outputs.is-skip}}
-        run: |
-          if [ ${IS_SKIP} > 0 ]; then
-            exit 0
-          fi
-
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      is-updated: ${{ steps.check.outputs.is-updated }}
+    needs:
+      - pre-check
+    if: ${{ needs.pre-check.outputs.is-skip == 0 }}
+    steps:
       - name: Install pnpm
         uses: pnpm/action-setup@v4.0.0
 
@@ -59,7 +60,8 @@ jobs:
   test:
     # add comment of pull request && comment is KEYWORD
     needs:
+      - pre-check
       - check
-    if: ${{ needs.check.outputs.is-updated == 0 }}
+    if: ${{ needs.pre-check.outputs.is-skip == 1 || needs.check.outputs.is-updated == 0 }}
     name: Run CI
     uses: ./.github/workflows/test.yml
