@@ -6,13 +6,11 @@ on:
       - opened
       - reopened
       - synchronize
-  
-
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GH_EMAIL: '41898282+github-actions[bot]@users.noreply.github.com'
-  GH_USER: 'github-actions[bot]'
+  GH_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+  GH_USER: "github-actions[bot]"
 
 jobs:
   test:
@@ -23,7 +21,7 @@ jobs:
         id: pre-check
         # with:
         #   target-sha: ${{ github.event.pull_request.head.sha }}
-      
+
       - run: |
           echo "Result"
           echo ${{ steps.pre-check.outputs.is-skip }}

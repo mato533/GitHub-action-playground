@@ -21,7 +21,6 @@ jobs:
 
           echo "detected version: ${APP_VERSION}"
 
-
       - uses: actions/create-github-app-token@v1
         id: app-token
         with:
@@ -61,4 +60,3 @@ jobs:
             git commit -m "chore: update version of package.json" -m "[skip ci]"
             git push
           fi
-          
