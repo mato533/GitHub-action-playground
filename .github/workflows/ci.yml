@@ -41,16 +41,13 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install
-
+          
       - uses: mato533/cicd-actions/format-source-code@develop
         with:
           app-id: ${{ vars.APP_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
           branch: ${{ github.head_ref }}
-          
+
   test:
     # add comment of pull request && comment is KEYWORD
     # if: (github.event.issue.pull_request != null) && github.event.comment.body == '/run-test'
