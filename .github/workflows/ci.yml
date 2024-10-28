@@ -65,6 +65,6 @@ jobs:
     needs:
       - pre-check
       - check
-    if: ${{ needs.pre-check.outputs.is-skip == 1 || needs.check.outputs.is-updated == 0 }}
+    if: ${{ needs.pre-check.outputs.is-skip > 0 || needs.check.outputs.is-updated == 0 }}
     name: Run CI
     uses: ./.github/workflows/test.yml
