@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       is-skip: ${{ steps.pre-check.outputs.is-skip }}
+      is-skip-test: ${{ steps.pre-check.outputs.is-skip-test }}
     steps:
       - id: pre-check
         uses: mato533/cicd-actions/pre-check@main
@@ -52,6 +53,6 @@ jobs:
     needs:
       - pre-check
       - check
-    if: ${{  !cancelled() && !failure() && (needs.pre-check.outputs.is-skip > 0 || needs.check.outputs.is-updated == 0) }}
+    if: ${{  !cancelled() && !failure() && needs.pre-check.outputs.is-skip-test == 0 && (needs.pre-check.outputs.is-skip > 0 || needs.check.outputs.is-updated == 0) }}
     name: Run CI
     uses: ./.github/workflows/test.yml
