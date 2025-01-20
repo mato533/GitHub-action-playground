@@ -1,0 +1,36 @@
+name: Bump Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-type:
+        description: "Select version type"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+env:
+  GH_EMAIL: "41898282+github-actions[bot]@users.noreply.github.com"
+  GH_USER: "github-actions[bot]"
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      VERSION_TYPE: ${{ github.event.inputs.version-type }}
+    steps:
+      - run: |
+          echo "::group::LEVEL 1"
+          echo "Level 1"
+          echo "::group::LEVEL 1 - 2"
+          echo "Level 2"
+          echo "::endgroup::"
+          echo "::endgroup::"
