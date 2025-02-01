@@ -1,0 +1,50 @@
+name: Bump Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch. Defaults to "main".'
+        required: true
+        type: choice
+        options:
+          - ActiveVersion
+          - MaintenanceVersion
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  define-target-branch:
+    runs-on: ubuntu-latest
+    outputs:
+      target-branch: ${{ steps.output-target-branch.outputs.target-branch }}
+    steps:
+      - uses: actions/checkout@v4
+        if: ${{ inputs.branch == 'MaintenanceVersion' }}
+        with:
+          ref: "main"
+          fetch-depth: 0
+      - name: Calculate the version
+        id: calculate-maintenance-version
+        if: ${{ inputs.branch == 'MaintenanceVersion' }}
+        run: |
+          # packages/wdio-electron-service/package.json
+          PKG_JSON='package.json'
+          CURRENT_MAJOR_VERSION="$(cat ${PKG_JSON} |jq -r '.version' |grep -o -E "([0-9]+){1})?" |head -n1)"
+          echo "version=$((CURRENT_MAJOR_VERSION - 1))" >>"${GITHUB_OUTPUT}"
+      - id: output-target-branch
+        env:
+          TARGET_RELEASE: ${{ inputs.branch }}
+          MAINTENANCE_VERSION: ${{ steps.calculate-maintenance-version.outputs.version }}
+        run: |
+          if [ "${TARGET_RELEASE}" == "ActiveVersion" ]; then
+            echo "target-branch=main" >>"${GITHUB_OUTPUT}"
+          else 
+            echo "target-branch=v${MAINTENANCE_VERSION}" >>"${GITHUB_OUTPUT}"
+          fi
+  release:
+    runs-on: ubuntu-latest
+    needs:
+      - define-target-branch
+    steps:
+      - run: echo ${{ needs.define-target-branch.outputs.target-branch }}
