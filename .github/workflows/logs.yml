@@ -1,0 +1,34 @@
+name: Log Download
+
+on:
+  workflow_dispatch:
+    inputs:
+      paths:
+        description: "path"
+        required: true
+        type: string
+        default: "logs/*/*.log"
+      output:
+        description: "name"
+        required: true
+        type: string
+        default: "log-test.zip"
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  define-target-branch:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 🤐 Create Archive
+        run: 7z a -tzip -r ${{ inputs.output }} ${{ inputs.paths }}
+        if: ${{ runner.os == 'Windows' }}
+        #      run: Compress-Archive -Path ${{ inputs.paths }} -Destination ${{ inputs.output }}
+
+      - name: ⬆️ Upload Archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: "log-test"
+          path: ${{ inputs.output }}
