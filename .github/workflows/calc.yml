@@ -48,3 +48,9 @@ jobs:
       - define-target-branch
     steps:
       - run: echo ${{ needs.define-target-branch.outputs.target-branch }}
+  env:
+    runs-on: ubuntu-latest
+    needs:
+      - define-target-branch
+    steps:
+      - run: env
