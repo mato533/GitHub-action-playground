@@ -32,7 +32,7 @@ jobs:
           script: |
             const { generateBuildCommand } = await import('${{ github.workspace }}/scripts/ci-utils.js')
 
-            return await generateBuildCommand(${{inputs.scenario}}, ${{inputs.type}})
+            return await generateBuildCommand('${{inputs.scenario}}', '${{inputs.type}}')
 
       - id: gen-test
         uses: actions/github-script@v7
@@ -41,7 +41,7 @@ jobs:
           script: |
             const { generateTestCommand } = await import('${{ github.workspace }}/scripts/ci-utils.js')
 
-            return await generateTestCommand(${{inputs.scenario}}, ${{inputs.type}})
+            return await generateTestCommand('${{inputs.scenario}}', '${{inputs.type}}')
 
       - id: result
         env:
